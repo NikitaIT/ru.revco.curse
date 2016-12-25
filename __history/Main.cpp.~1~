@@ -1,0 +1,369 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+#include <math.h>
+
+#include "Main.h"
+#include "Change.h"
+#include <stdio.h>
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+        : TForm(Owner)
+{
+}
+
+
+typedef struct        //объявляем структуру
+{
+char Train[4];
+char DepartureTime[6];
+char DepartureDate[20];
+char ArrivalTime[6];
+char ArrivalDate[20];
+char Out[10];
+char In[10];
+char Type[20];
+} type;
+
+
+type base[100];   //объявляем массив типа определённой выше структуры, в котором будем хранить все данные из файла
+
+int j=0; // переменная счётчик, необходимая для заполнения массива из файла
+int a=0; // переменная счётчик, получающая в ходе программы значение переменной j. Нужна для заполнения таблицы
+
+AnsiString TimeInWay(AnsiString x1)   //функция расчёта среднего времени в пути
+{
+  TDateTime DTO, DTP;
+  double y;
+  double Days, Hours, Mins;
+  double DaysG=0;
+  double HoursG=0;
+  double MinsG=0;
+  int k=0;
+  for(int i=0; i<a; i++)
+  {
+    if(strncmp(base[i].Type, x1.c_str(), 20)==0)
+    {
+      DTO = StrToDateTime(AnsiString(base[i].DepartureDate) + " " + AnsiString(base[i].DepartureTime));
+      DTP = StrToDateTime(AnsiString(base[i].ArrivalDate) + " " + AnsiString(base[i].ArrivalTime));
+      y = modf((double)DTP - DTO, &Days);
+      y = modf((24 * y), &Hours);
+      y = modf((60 * y), &Mins);
+      DaysG=DaysG+Days;
+      HoursG=HoursG+Hours;
+      MinsG=MinsG+Mins;
+      k++;
+    }
+  }
+  return(IntToStr((int)DaysG/k) + " дн. " + IntToStr((int)HoursG/k) + " час. " + IntToStr((int)MinsG/k) + " мин.");
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::N2Click(TObject *Sender)
+{
+   if(!OpenDialog1->Execute()) return;
+   FILE* inp = fopen(OpenDialog1->FileName.c_str(), "r"); // открываем файл для считывания данные из файла
+
+  while(!feof(inp))        //считываем данные из указанного пользователем файла в наш массив data
+   {  memset(&base[j], 0, sizeof(type));
+      fscanf(inp, " %s %s %s %s %s %s %s %s",
+      &base[j].Train, &base[j].DepartureTime, &base[j].DepartureDate, &base[j].ArrivalTime, &base[j].ArrivalDate, &base[j].Out, &base[j].In, &base[j].Type);
+     j++;
+   }
+   fclose(inp);
+
+   ListView1->Items->Clear();  // освобождаем таблицу TListView
+
+   for (int i=0; i < j; i++)     //цикл заполнения таблицы
+   {
+   TListItem * ListItem = ListView1->Items->Add(); // заполняем таблицу TListView данными из массива base
+   ListItem->Caption = base[i].Train;           //добавление данный в первую ячейку из элемента массива base[i].Train
+   ListItem->SubItems->Add(base[i].DepartureTime);      //аналогично по всем ячейкам вправо данной строки
+   ListItem->SubItems->Add(base[i].DepartureDate);
+   ListItem->SubItems->Add(base[i].ArrivalTime);
+   ListItem->SubItems->Add(base[i].ArrivalDate);
+   ListItem->SubItems->Add(base[i].Out);
+   ListItem->SubItems->Add(base[i].In);
+   ListItem->SubItems->Add(base[i].Type);
+   }
+   a=j;
+   j=0; //обнуляем j, чтобы в случае повторного открытия какого-либо файла не получалось так, что данные добавляются снизу таблицы, а не обновляют уже имеющиеся
+
+  ListBox1->Items->Clear();               //заполняем листбоксы данными из массива для расчётов
+  ListBox1->Items->Add("все типы");
+  for (int i(0); i < a; i++)
+    {
+       if (ListBox1->Items->IndexOf(base[i].Type) == -1) // только если этого элемента еще нет в ListBox-е
+            ListBox1->Items->Add(base[i].Type);
+    }
+
+ ListBox2->Items->Clear();
+  ListBox2->Items->Add("все типы");
+  for (int i(0); i < a; i++)
+    {
+       if (ListBox2->Items->IndexOf(base[i].Type) == -1) // только если этого элемента еще нет в ListBox-е
+            ListBox2->Items->Add(base[i].Type);
+    }
+
+ ListBox3->Items->Clear();
+  for (int i(0); i < a; i++)
+    {
+       if (ListBox3->Items->IndexOf(base[i].In) == -1) // только если этого элемента еще нет в ListBox-е
+            ListBox3->Items->Add(base[i].In);
+    }
+    for (int i(0); i < a; i++)
+    {
+       if (ListBox3->Items->IndexOf(base[i].Out) == -1) // только если этого элемента еще нет в ListBox-е
+            ListBox3->Items->Add(base[i].Out);
+    }
+    Button2->Enabled=true;
+
+ //построение графика
+   Series1->Clear();
+   int result=0;
+   for(int i(0);i<ListBox3->Items->Count;i++)
+    {
+      for(int k=0;k<a;k++)
+        if(ListBox3->Items->IndexOf(base[k].In) == i || ListBox3->Items->IndexOf(base[k].Out) == i)
+          result++;
+      Series1->AddXY(i,result,ListBox3->Items->Strings[i],clRed);
+      result=0;
+    }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N3Click(TObject *Sender)
+{
+  if(!SaveDialog1->Execute()) return;  // сохраняем изменённые данные в файл
+
+  FILE* out = fopen(SaveDialog1->FileName.c_str(), "w"); //тут создаём файл с заданным пользователем именем для записи данных(буковка w - write)
+
+   for(int i = 0; i < a; i++) //цикл: собственно, запись данных из массива в файл функцие fprintf
+   {
+      fprintf(out, " %9s %11s %25s %11s %25s %15s %15s %18s\n",
+      &base[i].Train, &base[i].DepartureTime, &base[i].DepartureDate, &base[i].ArrivalTime, &base[i].ArrivalDate, &base[i].Out, &base[i].In, &base[i].Type);
+   }
+   fclose(out);    //конец записи, закрытие файла
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button3Click(TObject *Sender)
+{
+if(Edit3->Text!="" && Edit4->Text!="" && Edit5->Text!="" && Edit6->Text!="" && Edit7->Text!="" && Edit8->Text!="" && Edit9->Text!="" && Edit10->Text!="") //при условии, что все поля текста компонентов TEdit не пустые выполняется добавление напечаттаных пользователем элементов к массиву
+   {
+     strcpy(base[a].Train , Edit3->Text.c_str());
+     strcpy(base[a].DepartureTime , Edit4->Text.c_str());
+     strcpy(base[a].DepartureDate , Edit5->Text.c_str());
+     strcpy(base[a].ArrivalTime , Edit6->Text.c_str()) ;
+     strcpy(base[a].ArrivalDate , Edit7->Text.c_str()) ;
+     strcpy(base[a].Out , Edit8->Text.c_str());
+     strcpy(base[a].In , Edit9->Text.c_str()) ;
+     strcpy(base[a].Type , Edit10->Text.c_str()) ;
+     a++;
+   ListView1->Items->Clear();  // освобождаем таблицу TListView
+
+   for (int i=0; i < a; i++)     //цикл заполнения таблицы
+   {
+   TListItem * ListItem = ListView1->Items->Add(); // заполняем таблицу TListView данными из массива base
+   ListItem->Caption = base[i].Train;         
+   ListItem->SubItems->Add(base[i].DepartureTime);
+   ListItem->SubItems->Add(base[i].DepartureDate);
+   ListItem->SubItems->Add(base[i].ArrivalTime);
+   ListItem->SubItems->Add(base[i].ArrivalDate);
+   ListItem->SubItems->Add(base[i].Out);
+   ListItem->SubItems->Add(base[i].In);
+   ListItem->SubItems->Add(base[i].Type);
+   }
+   }
+else            //в случае, если одно из полей TEdit не заполнено - вылетает ошибка и не выпускает нас с третей формы, пока всё не заполним либо не выйдем без изменений
+   MessageBox(0,"Пожалуйста, заполните все поля для добавления перед подтверждением.","",0);
+
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N8Click(TObject *Sender)
+{
+  Form1->Enabled=false;   //обращение ко второй форме(редактирование строки)
+  Form2->Show();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Selection(TObject *Sender, TListItem *Item,
+      bool Selected)
+{
+  if(ListView1->ItemIndex!=-1)   //если выбрана какая-либо строка с данными
+  {
+    Form2->Edit3->Text = base[ListView1->ItemIndex].Train; // заносим данные из массива в поля TEdit второй формы для редактирования
+    Form2->Edit4->Text = base[ListView1->ItemIndex].DepartureTime;
+    Form2->Edit5->Text = base[ListView1->ItemIndex].DepartureDate;
+    Form2->Edit6->Text = base[ListView1->ItemIndex].ArrivalTime;
+    Form2->Edit7->Text = base[ListView1->ItemIndex].ArrivalDate;
+    Form2->Edit8->Text = base[ListView1->ItemIndex].Out;
+    Form2->Edit9->Text = base[ListView1->ItemIndex].In;
+    Form2->Edit10->Text = base[ListView1->ItemIndex].Type;
+    N7->Enabled=true;                                //активация кнопки Удалить
+    N8->Enabled=true;                               // активация кнопки Редактировать, чтобы позволить изменять данные(до этого была отключена во избежание вывода в компоненты TEdit второй формы ереси всякой)
+  }
+  else
+  {
+    N7->Enabled=false;                                //деактивация кнопки Удалить
+    N8->Enabled=false;                               // деактивация кнопки Редактировать
+  }
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::N7Click(TObject *Sender)
+{
+ if(MessageBox(Handle, "Вы уверены, что хотите убрать выбранный поезд из расписания?", "Уведомление", MB_YESNO | MB_ICONQUESTION) == IDYES)
+  {
+  type temp[99]; //декларируем массив, такой же, как base[100], но на единицу меньше размером
+  int k = 0;     //задаём переменную счётчик, которая понадобится при заполнении массива
+  for(int i =0; i<a; i++)// цикл: переписываем все данные из нашего массива base, за исключением выбранного элемента, соответствующего индексу выделенной строки таблицы.
+  {
+    if(i!= ListView1->ItemIndex)
+     {
+       strcpy(temp[k].Train, base[i].Train);    // здесь у записываемого массива индекс k, т.к. если брять i, то данные из строки просто будут стираться, но сама строка останется
+       strcpy(temp[k].DepartureTime, base[i].DepartureTime);
+       strcpy(temp[k].DepartureDate, base[i].DepartureDate);
+       strcpy(temp[k].ArrivalTime, base[i].ArrivalTime);
+       strcpy(temp[k].ArrivalDate, base[i].ArrivalDate);
+       strcpy(temp[k].Out, base[i].Out);
+       strcpy(temp[k].In, base[i].In);
+       strcpy(temp[k].Type, base[i].Type);
+       k++;
+     }
+  }   //конец цикла
+   --a;
+   for(int i=0; i<a; i++)                  // цикл: обратное переписывание данных в массив bae
+   {
+       strcpy(base[i].Train, temp[i].Train);    // здесь у записываемого массива индекс k, т.к. если брaть i, то данные из строки просто будут стираться, но сама строка останется
+       strcpy(base[i].DepartureTime, temp[i].DepartureTime);
+       strcpy(base[i].DepartureDate, temp[i].DepartureDate);
+       strcpy(base[i].ArrivalTime, temp[i].ArrivalTime);
+       strcpy(base[i].ArrivalDate, temp[i].ArrivalDate);
+       strcpy(base[i].Out, temp[i].Out);
+       strcpy(base[i].In, temp[i].In);
+       strcpy(base[i].Type, temp[i].Type);
+   }                                 //конец цикла
+   ListView1->Items->Clear();  // освобождаем таблицу TListView
+   for (int i=0; i < a; i++)     //цикл заполнения таблицы
+   {
+   TListItem * ListItem = ListView1->Items->Add(); // заполняем таблицу TListView данными из массива base
+   ListItem->Caption = base[i].Train;
+   ListItem->SubItems->Add(base[i].DepartureTime);
+   ListItem->SubItems->Add(base[i].DepartureDate);
+   ListItem->SubItems->Add(base[i].ArrivalTime);
+   ListItem->SubItems->Add(base[i].ArrivalDate);
+   ListItem->SubItems->Add(base[i].Out);
+   ListItem->SubItems->Add(base[i].In);
+   ListItem->SubItems->Add(base[i].Type);
+   }
+  }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::back(TObject *Sender)     //возврат со второй формы к первой
+{
+  if(a!=0)
+  {
+   ListView1->Items->Clear();  // освобождаем таблицу TListView
+   for (int i=0; i < a; i++)     //цикл обновления данных таблицы
+   {
+   TListItem * ListItem = ListView1->Items->Add(); // заполняем таблицу TListView данными из массива base
+   ListItem->Caption = base[i].Train;
+   ListItem->SubItems->Add(base[i].DepartureTime);
+   ListItem->SubItems->Add(base[i].DepartureDate);
+   ListItem->SubItems->Add(base[i].ArrivalTime);
+   ListItem->SubItems->Add(base[i].ArrivalDate);
+   ListItem->SubItems->Add(base[i].Out);
+   ListItem->SubItems->Add(base[i].In);
+   ListItem->SubItems->Add(base[i].Type);
+   }
+  }
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::Button2Click(TObject *Sender) //расчёт загруженности станций
+{
+   int result=0;
+   for(int i=0; i<a;i++)
+    {
+    if(ListBox2->Items->IndexOf(base[i].Type) == ListBox2->ItemIndex && (ListBox3->Items->IndexOf(base[i].In) == ListBox3->ItemIndex || ListBox3->Items->IndexOf(base[i].Out) == ListBox3->ItemIndex))
+      ++result;
+    if(ListBox2->ItemIndex==0 && (ListBox3->Items->IndexOf(base[i].In) == ListBox3->ItemIndex || ListBox3->Items->IndexOf(base[i].Out) == ListBox3->ItemIndex))
+      ++result;
+    }
+    Edit2->Text =result;
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::Button4Click(TObject *Sender)
+{
+ //построение графика
+   Series1->Clear();
+   int result=0;
+   for(int i(0);i<ListBox3->Items->Count;i++)
+    {
+      for(int k=0;k<a;k++)
+        if(ListBox3->Items->IndexOf(base[k].In) == i || ListBox3->Items->IndexOf(base[k].Out) == i)
+          result++;
+      Series1->AddXY(i,result,ListBox3->Items->Strings[i],clRed);
+      result=0;
+    }        
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+  if(ListBox1->ItemIndex!=0 && ListBox1->ItemIndex!=-1)     //обращение к написанной в начале функции  TimeInWay
+  Edit1->Text = TimeInWay (ListBox1->Items->Strings[ListBox1->ItemIndex]);
+  else
+  {                                       //в случае выбора "все типы" в первом листбоксе рассчитываем по всем типам
+   if(ListBox1->ItemIndex!=-1)
+    {
+      TDateTime DTO, DTP;
+      double y;
+      double Days, Hours, Mins;
+      double DaysG=0;
+      double HoursG=0;
+      double MinsG=0;
+      for(int i=0; i<a; i++)
+      {
+         DTO = StrToDateTime(AnsiString(base[i].DepartureDate) + " " + AnsiString(base[i].DepartureTime));
+         DTP = StrToDateTime(AnsiString(base[i].ArrivalDate) + " " + AnsiString(base[i].ArrivalTime));
+         y = modf((double)DTP - DTO, &Days);
+         y = modf((24 * y), &Hours);
+         y = modf((60 * y), &Mins);
+         DaysG=DaysG+Days;
+         HoursG=HoursG+Hours;
+         MinsG=MinsG+Mins;
+      }
+      Edit1->Text = IntToStr((int)DaysG/a) + " дн. " + IntToStr((int)HoursG/a) + " час. " + IntToStr((int)MinsG/a) + " мин.";
+    }
+   }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::ListBox1Click(TObject *Sender)
+{
+   if(ListBox1->ItemIndex!=-1)         //чтобы не было ошибок в программе, предупреждаем возможность обратиться к функции(если тип не выбран), деактивируя кнопку обращения к ней(см.выше)
+    Button1->Enabled=true;
+   else
+    Button1->Enabled=false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N4Click(TObject *Sender)
+{
+  if(MessageBox(Handle, "Вы уверены, что хотите выйти?", "Уведомление", MB_YESNO | MB_ICONQUESTION) == IDYES)  // вызов окошка подтверждения закрытия формы
+  Close();
+}
+//---------------------------------------------------------------------------
+
