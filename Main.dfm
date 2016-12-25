@@ -1,10 +1,10 @@
 object Form1: TForm1
-  Left = 70
-  Top = 153
+  Left = 79
+  Top = 158
   BorderStyle = bsSingle
   Caption = #1056#1072#1089#1087#1080#1089#1072#1085#1080#1077' '#1087#1086#1077#1079#1076#1086#1074
   ClientHeight = 436
-  ClientWidth = 1241
+  ClientWidth = 1229
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -55,7 +55,7 @@ object Form1: TForm1
   end
   object Label4: TLabel
     Left = 672
-    Top = 336
+    Top = 376
     Width = 55
     Height = 13
     Caption = #1056#1077#1079#1091#1083#1100#1090#1072#1090':'
@@ -177,33 +177,31 @@ object Form1: TForm1
     OnSelectItem = Selection
   end
   object btnMiddleTime: TButton
-    Left = 160
-    Top = 296
+    Left = 152
+    Top = 288
     Width = 137
     Height = 33
     Caption = #1056#1072#1089#1095#1105#1090
-    Enabled = False
     TabOrder = 1
     OnClick = btnMiddleTimeClick
   end
   object btnLoadingByType: TButton
     Left = 672
-    Top = 288
+    Top = 336
     Width = 137
     Height = 33
     Caption = #1056#1072#1089#1095#1105#1090
-    Enabled = False
     TabOrder = 2
     OnClick = btnLoadingByTypeClick
   end
   object eLoadingByType: TEdit
     Left = 672
-    Top = 360
+    Top = 400
     Width = 137
     Height = 21
     TabOrder = 3
   end
-  object cGraf: TChart
+  object cGraph: TChart
     Left = 352
     Top = 256
     Width = 313
@@ -222,7 +220,6 @@ object Form1: TForm1
       #1043#1088#1072#1092#1080#1082' '#1079#1072#1075#1088#1091#1078#1077#1085#1085#1086#1089#1090#1080' '#1089#1090#1072#1085#1094#1080#1081)
     BottomAxis.Visible = False
     Legend.Visible = False
-    View3D = False
     BevelOuter = bvNone
     TabOrder = 4
     object Series1: TBarSeries
@@ -238,6 +235,35 @@ object Form1: TForm1
       YValues.Multiplier = 1
       YValues.Order = loNone
     end
+    object Series2: TGanttSeries
+      ColorEachPoint = True
+      Marks.ArrowLength = 0
+      Marks.Visible = False
+      SeriesColor = clGreen
+      Pointer.InflateMargins = True
+      Pointer.Style = psRectangle
+      Pointer.Visible = True
+      XValues.DateTime = True
+      XValues.Name = 'Start'
+      XValues.Multiplier = 1
+      XValues.Order = loAscending
+      YValues.DateTime = False
+      YValues.Name = 'Y'
+      YValues.Multiplier = 1
+      YValues.Order = loNone
+      StartValues.DateTime = True
+      StartValues.Name = 'Start'
+      StartValues.Multiplier = 1
+      StartValues.Order = loAscending
+      EndValues.DateTime = True
+      EndValues.Name = 'End'
+      EndValues.Multiplier = 1
+      EndValues.Order = loNone
+      NextTask.DateTime = False
+      NextTask.Name = 'NextTask'
+      NextTask.Multiplier = 1
+      NextTask.Order = loNone
+    end
   end
   object btnAdd: TButton
     Left = 1056
@@ -252,23 +278,24 @@ object Form1: TForm1
     Left = 16
     Top = 288
     Width = 129
-    Height = 129
+    Height = 105
     ItemHeight = 13
     TabOrder = 6
     OnClick = lbMiddleTimeClick
   end
-  object btnGraf: TButton
-    Left = 232
-    Top = 384
-    Width = 121
+  object btnGraph: TButton
+    Left = 216
+    Top = 392
+    Width = 137
     Height = 33
     Caption = #1054#1073#1085#1086#1074#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
+    Enabled = False
     TabOrder = 7
-    OnClick = btnGrafClick
+    OnClick = btnGraphClick
   end
-  object ebtnMiddleTime: TEdit
-    Left = 216
-    Top = 352
+  object eMiddleTime: TEdit
+    Left = 152
+    Top = 368
     Width = 137
     Height = 21
     TabOrder = 8
@@ -278,10 +305,11 @@ object Form1: TForm1
     Top = 288
     Width = 209
     Height = 137
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goColSizing, goEditing, goRowSelect, goThumbTracking]
     TabOrder = 9
     TitleCaptions.Strings = (
-      #1053#1086#1084#1077#1088
-      #1058#1080#1087)
+      #1057#1090#1072#1085#1094#1080#1103
+      #1047#1072#1075#1088#1091#1078#1077#1085#1085#1086#1089#1090#1100)
     ColWidths = (
       98
       105)
@@ -387,9 +415,76 @@ object Form1: TForm1
     Text = #1057#1082#1086#1088#1099#1081
     DropDownCount = 8
   end
-  object mmTopMenu: TMainMenu
-    Left = 752
+  object cbeLoadingByType: TComboBoxEx
+    Left = 672
+    Top = 296
+    Width = 137
+    Height = 22
+    Hint = #1058#1080#1087
+    ItemsEx.CaseSensitive = False
+    ItemsEx.SortType = stNone
+    ItemsEx = <
+      item
+        Caption = #1043#1088#1091#1079#1086#1074#1086#1081
+      end
+      item
+        Caption = #1055#1072#1089#1089#1072#1078#1080#1088#1089#1082#1080#1081
+      end
+      item
+        Caption = #1057#1082#1086#1088#1099#1081
+      end>
+    StyleEx = []
+    ItemHeight = 16
+    TabOrder = 18
+    Text = #1057#1082#1086#1088#1099#1081
+    DropDownCount = 8
+  end
+  object cbeMiddleTime: TComboBoxEx
+    Left = 152
+    Top = 328
+    Width = 137
+    Height = 22
+    Hint = #1058#1080#1087
+    ItemsEx.CaseSensitive = False
+    ItemsEx.SortType = stNone
+    ItemsEx = <
+      item
+        Caption = #1043#1088#1091#1079#1086#1074#1086#1081
+      end
+      item
+        Caption = #1055#1072#1089#1089#1072#1078#1080#1088#1089#1082#1080#1081
+      end
+      item
+        Caption = #1057#1082#1086#1088#1099#1081
+      end
+      item
+        Caption = #1042#1089#1077
+      end>
+    StyleEx = []
+    ItemHeight = 16
+    TabOrder = 19
+    Text = #1057#1082#1086#1088#1099#1081
+    DropDownCount = 8
+  end
+  object meSearch: TMaskEdit
+    Left = 16
+    Top = 408
+    Width = 129
+    Height = 21
+    TabOrder = 20
+    OnKeyPress = meSearchKeyPress
+  end
+  object StaticText1: TStaticText
+    Left = 16
     Top = 392
+    Width = 36
+    Height = 17
+    Caption = #1055#1086#1080#1089#1082
+    TabOrder = 21
+  end
+  object mmTopMenu: TMainMenu
+    Left = 8
+    Top = 216
     object miFileView: TMenuItem
       Caption = #1060#1072#1081#1083
       object miOpen: TMenuItem
@@ -420,11 +515,11 @@ object Form1: TForm1
     end
   end
   object OpenDialog1: TOpenDialog
-    Left = 672
-    Top = 392
+    Left = 72
+    Top = 216
   end
   object SaveDialog1: TSaveDialog
-    Left = 712
-    Top = 392
+    Left = 40
+    Top = 216
   end
 end

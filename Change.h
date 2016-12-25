@@ -35,7 +35,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
 public:		// User declarations
         __fastcall TForm2(TComponent* Owner);
-        TListItem *Item;
+        TListItem *Item;//выделенный элемент
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm2 *Form2;

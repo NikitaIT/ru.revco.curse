@@ -2,7 +2,8 @@
 #pragma hdrstop
 #include "Main.h"
 #include "Change.h"
-
+#include <map>
+#include <math.h>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -12,164 +13,44 @@ __fastcall TForm1::TForm1(TComponent* Owner)
         : TForm(Owner)
 {
 }
-
-
-/*
-AnsiString TimeInWay(AnsiString x1)   //функция расчёта среднего времени в пути
+//-----------функция расчёта среднего времени в пути-------------------------
+AnsiString TForm1::TimeInWay(AnsiString searchType)
 {
-  TDateTime DTO, DTP;
-  double y;
-  double Days, Hours, Mins;
-  double DaysG=0;
-  double HoursG=0;
-  double MinsG=0;
-  int k=0;
-  for(int i=0; i<a; i++)
-  {
-	if(strncmp(base[i].Type, x1.c_str(), 20)==0)
-	{
-	  DTO = StrToDateTime(AnsiString(base[i].DepartureDate) + " " + AnsiString(base[i].DepartureTime));
-	  DTP = StrToDateTime(AnsiString(base[i].ArrivalDate) + " " + AnsiString(base[i].ArrivalTime));
-	  y = modf((double)DTP - DTO, &Days);
-	  y = modf((24 * y), &Hours);
-	  y = modf((60 * y), &Mins);
-	  DaysG=DaysG+Days;
-	  HoursG=HoursG+Hours;
-	  MinsG=MinsG+Mins;
-	  k++;
-	}
-  }
+        TDateTime DTO, DTP;
+        double y;
+        double Days, Hours, Mins;
+        double DaysG=0;
+        double HoursG=0;
+        double MinsG=0;
+        int k=0;
+        TListItems * RowItems = lvTrains->Items;//список списков
+        for(int i = 0; i < RowItems->Count; i++)
+        {
+                TListItem * Row = RowItems->Item[i];//список из списоков
+                if((Row->SubItems->Strings[TYPE]==searchType)||(searchType=="Все")){
+                        DTO = StrToDateTime(
+                                Row->SubItems->Strings[DATE_START] + " "
+                                + Row->SubItems->Strings[TIME_START]);
+	                DTP = StrToDateTime(
+                                Row->SubItems->Strings[DATE_END] + " "
+                                + Row->SubItems->Strings[TIME_END]);
+	                y = modf((double)DTP - DTO, &Days);
+	                y = modf((24 * y), &Hours);
+	                y = modf((60 * y), &Mins);
+	                DaysG=DaysG+Days;
+	                HoursG=HoursG+Hours;
+	                MinsG=MinsG+Mins;
+	                k++;
+                }
+        }
   return(IntToStr((int)DaysG/k) + " дн. " + IntToStr((int)HoursG/k) + " час. " + IntToStr((int)MinsG/k) + " мин.");
-}
-          */
-
-//заполняем листбоксы данными для расчётов
-void TForm1::CRUDToListOfMiddleTime(Op op){
-        //ListBox1->Items->Add(base[i].Type);
-        switch(op)
-    {
-    case CREATE:
-        {
-        break;
-        }
-    case READ:
-        {
-        break;
-        }
-    case UPDATE:
-        {
-        break;
-        }
-    case DEL:
-        {
-        break;
-        }
-    default:
-        {
-                //ERROR
-                MessageBox(0,"CRUDToListOfMiddleTime.ERROR","",0);
-        }
-        //Button1->Enabled=true;
-    }
-}
-void TForm1::CRUDToListOfLoadingByType(Op op){
-    switch(op)
-    {
-    case CREATE:
-        {
-        break;
-        }
-    case READ:
-        {
-        break;
-        }
-    case UPDATE:
-        {
-        break;
-        }
-    case DEL:
-        {
-        break;
-        }
-    default:
-        {
-                //ERROR
-                MessageBox(0,"CRUDToListOfLoadingByType.ERROR","",0);
-        }
-    }
-    //Button2->Enabled=true;
-}
-//построение графика
-void TForm1::paintGraph(){
-   Series1->Clear();
-   int result=1;
-   /*
-   for(int i(0);i<ListBox3->Items->Count;i++)
-	{
-	  for(int k=0;k<a;k++)
-		if(ListBox3->Items->IndexOf(base[k].In) == i || ListBox3->Items->IndexOf(base[k].Out) == i)
-		  result++;
-	  Series1->AddXY(i,result,ListBox3->Items->Strings[i],clRed);
-	  result=0;
-	}           */
-
-}
-//---------------------------------------------------------------------------
-
-
-
-void __fastcall TForm1::btnLoadingByTypeClick(TObject *Sender) //расчёт загруженности станций
-{
-        /*
-   int result=0;
-   for(int i=0; i<a;i++)
-   {
-	if(ListBox2->Items->IndexOf(base[i].Type) == ListBox2->ItemIndex && (ListBox3->Items->IndexOf(base[i].In) == ListBox3->ItemIndex || ListBox3->Items->IndexOf(base[i].Out) == ListBox3->ItemIndex))
-	  ++result;
-	if(ListBox2->ItemIndex==0 && (ListBox3->Items->IndexOf(base[i].In) == ListBox3->ItemIndex || ListBox3->Items->IndexOf(base[i].Out) == ListBox3->ItemIndex))
-	  ++result;
-   }
-	Edit2->Text =result;   */
-}
-//---------------------------------------------------------------------------
-
-
-void __fastcall TForm1::btnGrafClick(TObject *Sender)
-{
- //построение графика
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::btnMiddleTimeClick(TObject *Sender)
 {
-        /*
-  if(ListBox1->ItemIndex!=0 && ListBox1->ItemIndex!=-1)     //обращение к написанной в начале функции  TimeInWay
-  Edit1->Text = TimeInWay (ListBox1->Items->Strings[ListBox1->ItemIndex]);
-  else
-  {//в случае выбора "все типы" в первом листбоксе рассчитываем по всем типам
-   if(ListBox1->ItemIndex!=-1)
-    {
-      TDateTime DTO, DTP;
-      double y;
-      double Days, Hours, Mins;
-      double DaysG=0;
-      double HoursG=0;
-      double MinsG=0;
-      for(int i=0; i<a; i++)
-      {
-         DTO = StrToDateTime(AnsiString(base[i].DepartureDate) + " " + AnsiString(base[i].DepartureTime));
-         DTP = StrToDateTime(AnsiString(base[i].ArrivalDate) + " " + AnsiString(base[i].ArrivalTime));
-         y = modf((double)DTP - DTO, &Days);
-         y = modf((24 * y), &Hours);
-         y = modf((60 * y), &Mins);
-         DaysG=DaysG+Days;
-         HoursG=HoursG+Hours;
-         MinsG=MinsG+Mins;
-      }
-      Edit1->Text = IntToStr((int)DaysG/a) + " дн. " + IntToStr((int)HoursG/a) + " час. " + IntToStr((int)MinsG/a) + " мин.";
-    }
-   }
-   */
+        AnsiString searchType = cbeLoadingByType->Text;
+        eMiddleTime->Text = TimeInWay(searchType);
 }
 //---------------------------------------------------------------------------
 
@@ -238,7 +119,7 @@ void __fastcall TForm1::btnAddClick(TObject *Sender)
         MessageBox(0,"Пожалуйста, заполните все поля для добавления перед подтверждением.","",0);
         }
 }
-//---------------------------------------------------------------------------
+//---------------------Разделение строки на подстроки------------------------
 std::string* TForm1::split(std::string s, std::string delimiter) {
 	size_t pos = 0;
 	std::string* arr = new std::string[100];
@@ -287,12 +168,12 @@ void TForm1::fileSaver(AnsiString FileName){
                         tmpRow += Row->SubItems->Strings[j]+";";
                 }
                 ptStrintList->Add(tmpRow);
-                
+
         }
         ptStrintList->SaveToFile(FileName);
         ptStrintList->Free();
 }
-//---------------------------------------------------------------------------
+//----------------------Открытие файла в меню--------------------------------
 void __fastcall TForm1::miOpenClick(TObject *Sender)
 {
         if (OpenDialog1->Execute())
@@ -304,7 +185,7 @@ void __fastcall TForm1::miOpenClick(TObject *Sender)
 //---------------сохраняем изменённые данные в файл--------------------------
 void __fastcall TForm1::miSaveClick(TObject *Sender)
 {
-  if(MyFName!= "")
+        if(MyFName!= "")
                 fileSaver(MyFName);
         else
         if(SaveDialog1->Execute())
@@ -313,17 +194,16 @@ void __fastcall TForm1::miSaveClick(TObject *Sender)
                 fileSaver(MyFName);
         }
 }
-//---------------------------------------------------------------------------
+//--------вызов окошка подтверждения закрытия формы--------------------------
 void __fastcall TForm1::miCloseClick(TObject *Sender)
 {
-        // вызов окошка подтверждения закрытия формы
         if(MessageBox(Handle,
                 "Вы уверены, что хотите выйти?",
                 "Уведомление",
                 MB_YESNO | MB_ICONQUESTION) == IDYES)
         Close();
 }
-//---------------------------------------------------------------------------
+//------------------Добавление в форму редактирования------------------------
 void __fastcall TForm1::Selection(TObject *Sender, TListItem *Item,
 	  bool Selected)
 {
@@ -350,13 +230,13 @@ void __fastcall TForm1::Selection(TObject *Sender, TListItem *Item,
         int index = cbeType->Items->IndexOf((AnsiString)Item->SubItems->Strings[6]);
         Form2->cbeType->ItemIndex =(index!=-1)?index:0;
 
-	miDelete->Enabled=true;//активация кнопки Удалить
-	miEdit->Enabled=true;// активация кнопки Редактировать, чтобы позволить изменять данные(до этого была отключена во избежание вывода в компоненты TEdit второй формы ереси всякой)
+	miDelete->Enabled=true;         //активация кнопки Удалить
+	miEdit->Enabled=true;           // активация кнопки Редактировать, чтобы позволить изменять данные(до этого была отключена во избежание вывода в компоненты TEdit второй формы ереси всякой)
   }
   else
   {
-	miDelete->Enabled=false;                                //деактивация кнопки Удалить
-	miEdit->Enabled=false;                               // деактивация кнопки Редактировать
+	miDelete->Enabled=false;        //деактивация кнопки Удалить
+	miEdit->Enabled=false;          // деактивация кнопки Редактировать
   }
 
 }
@@ -378,48 +258,143 @@ void __fastcall TForm1::miEditClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::miDeleteClick(TObject *Sender)
 {
- if(MessageBox(Handle, "Вы уверены, что хотите убрать выбранный поезд из расписания?", "Уведомление", MB_YESNO | MB_ICONQUESTION) == IDYES)
+ if(MessageBox(Handle,
+                "Вы уверены, что хотите убрать выбранный поезд из расписания?",
+                "Уведомление",
+                MB_YESNO | MB_ICONQUESTION)
+        == IDYES)
   {
       lvTrains->Selected->Delete();
   }
 }
-//---------------------------------------------------------------------------
+//-----------------------Сортировка по столбцам------------------------------
 void __fastcall TForm1::lvTrainsCompare(TObject *Sender, TListItem *Item1,
       TListItem *Item2, int Data, int &Compare)
 {
 if (rev==false)
     {
     if ((ColumnToSort == 0))
-    {Compare = CompareText(Item1->Caption,Item2->Caption);}
+    {Compare = CompareText(
+                Item1->Caption,
+                Item2->Caption);}
+    else if ((ColumnToSort == 1)||(ColumnToSort == 3))
+    {Compare = CompareTime(
+                StrToTime(Item1->SubItems->Strings[ColumnToSort-1]),
+                StrToTime(Item2->SubItems->Strings[ColumnToSort-1]));}
+    else if ((ColumnToSort == 2)||(ColumnToSort == 4))
+    {Compare = CompareDate(
+                StrToDate(Item1->SubItems->Strings[ColumnToSort-1]),
+                StrToDate(Item2->SubItems->Strings[ColumnToSort-1]));}
     else
-    {Compare = CompareText(Item1->SubItems->Strings[ColumnToSort-1], Item2->SubItems->Strings[ColumnToSort-1]);}
+    {Compare = CompareText(
+                Item1->SubItems->Strings[ColumnToSort-1],
+                Item2->SubItems->Strings[ColumnToSort-1]);}
     }
     else
     {
     if ((ColumnToSort == 0))
-    {Compare = CompareText(Item2->Caption,Item1->Caption);}
+    {Compare = CompareText(
+                Item2->Caption,
+                Item1->Caption);}
+    else if ((ColumnToSort == 1)||(ColumnToSort == 3))
+    {Compare = CompareTime(
+                StrToTime(Item2->SubItems->Strings[ColumnToSort-1]),
+                StrToTime(Item1->SubItems->Strings[ColumnToSort-1]));}
+    else if ((ColumnToSort == 2)||(ColumnToSort == 4))
+    {Compare = CompareDate(
+                StrToDate(Item2->SubItems->Strings[ColumnToSort-1]),
+                StrToDate(Item1->SubItems->Strings[ColumnToSort-1]));}
     else
-    {Compare = CompareText(Item2->SubItems->Strings[ColumnToSort-1],Item1->SubItems->Strings[ColumnToSort-1]);}
+    {Compare = CompareText(
+                Item2->SubItems->Strings[ColumnToSort-1],
+                Item1->SubItems->Strings[ColumnToSort-1]);}
     }
-/*
-        Compare =
-                (!rev)
-                ? ((ColumnToSort == 0))
-                        ? CompareText(
-                        Item1->Caption,
-                        Item2->Caption)
-                        : CompareText(
-                        Item1->SubItems->Strings[ColumnToSort-1],
-                        Item2->SubItems->Strings[ColumnToSort-1])
-                : ((ColumnToSort == 0))
-                        ? CompareText(
-                        Item2->Caption,
-                        Item1->Caption)
-                        : CompareText(
-                        Item2->SubItems->Strings[ColumnToSort-1],
-                        Item1->SubItems->Strings[ColumnToSort-1]);
-                           */
+}
+//------------------------построение графика----------------------------------
+void TForm1::paintGraph(){
+        Series1->Clear();
+        for(int i(1);i<kvleLoadingByType->RowCount;i++)
+            Series1->AddXY(i,
+                        StrToInt(kvleLoadingByType->Cells[1][i]),
+                        kvleLoadingByType->Cells[0][i],
+                        clRed);
+
+}
+//---------------------расчёт загруженности станций--------------------------
+void __fastcall TForm1::btnLoadingByTypeClick(TObject *Sender)
+{
+        while(kvleLoadingByType->RowCount>2)
+        kvleLoadingByType->DeleteRow(1);
+        std::map <AnsiString,int> Map;
+        std::map <AnsiString,int>::iterator at;
+
+        AnsiString searchType = cbeLoadingByType->Text;
+        int result=0;
+        TListItems * RowItems = lvTrains->Items;//список списков
+        for(int i = 0; i < RowItems->Count; i++)
+        {
+                TListItem * Row = RowItems->Item[i];//список из списоков
+                AnsiString ind0= Row->SubItems->Strings[TYPE];
+                if(Row->SubItems->Strings[TYPE]==searchType){
+                        result++;
+                        Map[Row->SubItems->Strings[PLASE_START]]++;
+                        Map[Row->SubItems->Strings[PLASE_END]]++;
+                }
+        }
+        for(at = Map.begin(); at != Map.end(); at++) {
+                kvleLoadingByType->Values[at->first] = at->second;
+        }
+	eLoadingByType->Text =result;
+        btnGraph->Enabled=true;
+        btnGraph->Click();
+}
+//------------------------построение графика---------------------------------
+void __fastcall TForm1::btnGraphClick(TObject *Sender)
+{
+        paintGraph();
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::sbSearchClick(TObject *Sender)
+{
+        lbMiddleTime->Clear();
+        AnsiString searchString = meSearch->Text;
+        int result=0;
+        TListItems * RowItems = lvTrains->Items;//список списков
+        for(int i = 0; i < RowItems->Count; i++)
+        {
+                TListItem * Row = RowItems->Item[i];//список из списоков
+
+                for(int j = 0; j < lvTrains->Columns->Count-1; j++)
+                {
+                        std::string str =Row->SubItems->Strings[j].c_str();
+                        if((str).find(searchString.c_str())!= std::string::npos)
+                        lbMiddleTime->Items->Add(Row->Caption);
+                }
+        }
+
+}
 //---------------------------------------------------------------------------
+
+void __fastcall TForm1::meSearchKeyPress(TObject *Sender, char &Key)
+{
+        lbMiddleTime->Clear();
+        AnsiString searchString = meSearch->Text;
+        int result=0;
+        TListItems * RowItems = lvTrains->Items;//список списков
+        for(int i = 0; i < RowItems->Count; i++)
+        {
+                TListItem * Row = RowItems->Item[i];//список из списоков
+
+                for(int j = 0; j < lvTrains->Columns->Count-1; j++)
+                {
+                        std::string str =Row->SubItems->Strings[j].c_str();
+                        if((str).find(searchString.c_str())!= std::string::npos){
+                                lbMiddleTime->Items->Add(Row->Caption);
+                                break;
+                        }
+                }
+        }        
+}
+//---------------------------------------------------------------------------
+

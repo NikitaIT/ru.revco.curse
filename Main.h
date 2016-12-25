@@ -18,19 +18,33 @@
 #include <Grids.hpp>
 #include <ValEdit.hpp>
 #include <Mask.hpp>
+#include <GanttCh.hpp>
+#include <Buttons.hpp>
 #include <string>
 #include <iostream>
 #include <stdio.h>
 #include <Math.hpp>
+#include "DateUtils.hpp"
+
 enum Op{
         CREATE,
         READ,
         DEL,
         UPDATE,
 };
-bool TestMod=1;
-bool rev;
-int ColumnToSort;
+enum Table{
+        TIME_START,
+        DATE_START,
+        TIME_END,
+        DATE_END,
+        PLASE_START,
+        PLASE_END,
+        TYPE,
+        NOMBER
+};
+bool TestMod=1;//дебаг мод
+bool rev;//сторона сортировки
+int ColumnToSort;//колонка сортировки
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
 {
@@ -53,7 +67,7 @@ __published:	// IDE-managed Components
         TButton *btnLoadingByType;
         TLabel *Label4;
         TEdit *eLoadingByType;
-        TChart *cGraf;
+        TChart *cGraph;
         TBarSeries *Series1;
         TLabel *Label5;
         TLabel *Label6;
@@ -66,8 +80,8 @@ __published:	// IDE-managed Components
         TLabel *Label13;
         TButton *btnAdd;
         TListBox *lbMiddleTime;
-        TButton *btnGraf;
-        TEdit *ebtnMiddleTime;
+        TButton *btnGraph;
+        TEdit *eMiddleTime;
         TValueListEditor *kvleLoadingByType;
         TMaskEdit *meNomber;
         TMaskEdit *mePlaceEnd;
@@ -77,6 +91,11 @@ __published:	// IDE-managed Components
         TDateTimePicker *dtpDateStart;
         TDateTimePicker *dtpTimeStart;
         TComboBoxEx *cbeType;
+        TComboBoxEx *cbeLoadingByType;
+        TComboBoxEx *cbeMiddleTime;
+        TGanttSeries *Series2;
+        TMaskEdit *meSearch;
+        TStaticText *StaticText1;
         void __fastcall miOpenClick(TObject *Sender);
         void __fastcall miSaveClick(TObject *Sender);
         void __fastcall btnAddClick(TObject *Sender);
@@ -85,7 +104,7 @@ __published:	// IDE-managed Components
           bool Selected);
         void __fastcall miDeleteClick(TObject *Sender);
         void __fastcall btnLoadingByTypeClick(TObject *Sender);
-        void __fastcall btnGrafClick(TObject *Sender);
+        void __fastcall btnGraphClick(TObject *Sender);
         void __fastcall btnMiddleTimeClick(TObject *Sender);
         void __fastcall lbMiddleTimeClick(TObject *Sender);
         void __fastcall miCloseClick(TObject *Sender);
@@ -93,6 +112,8 @@ __published:	// IDE-managed Components
         void __fastcall lvTrainsColumnClick(TObject *Sender, TListColumn *Column);
         void __fastcall lvTrainsCompare(TObject *Sender, TListItem *Item1,
           TListItem *Item2, int Data, int &Compare);
+        void __fastcall sbSearchClick(TObject *Sender);
+        void __fastcall meSearchKeyPress(TObject *Sender, char &Key);
 private:	// User declarations
         void CRUDToListOfMiddleTime(Op op);
         void CRUDToListOfLoadingByType(Op op);
@@ -102,6 +123,7 @@ private:	// User declarations
         void fileSaver(AnsiString FileName);
         void fileLoader(AnsiString FileName);
         void paintGraph();
+        AnsiString TimeInWay(AnsiString x1);
 public:		// User declarations
         __fastcall TForm1(TComponent* Owner);
         void Test();
